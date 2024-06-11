@@ -178,6 +178,13 @@ bool verifySignatureECC(const string &publicKeyPath, const string &pdfPath, cons
     return result == 1;
 }
 
+void copyFile(const string &sourcePath, const string &destinationPath)
+{
+    ifstream src(sourcePath, ios::binary);
+    ofstream dest(destinationPath, ios::binary);
+    dest << src.rdbuf();
+}
+
 int main(int argc, char *argv[])
 {
     int roles, action;
@@ -215,6 +222,7 @@ int main(int argc, char *argv[])
                     string signaturePath = "server/signed_signature.bin";
                     if (signPdfECC("seller/private_key.pem", pdfPath, signaturePath))
                     {
+                        copyFile("seller/" + pdfFile, "server/" + pdfFile);
                         cout << "PDF file is signed successfully.\n";
                     }
                     else
@@ -239,29 +247,16 @@ int main(int argc, char *argv[])
             do
             {
                 cout << "Choose action :\n";
-                cout << "1: Verify PDF file\n";
+                cout << "1: Receive PDF file\n";
                 cout << "2: Exit\n";
                 cin >> action;
                 if (action == 1)
                 {
-                    cout << "Buyer choose verify PDF.\n";
-                    string pdfPath, signaturePath;
-                    pdfPath = "server/verified_pdf.pdf";
-                    signaturePath = "server/signed_signature.bin";
-                    if (verifySignatureECC("server/public_key.pem", pdfPath, signaturePath))
-                    {
-                        cout << "PDF is verified successfully.\n";
-                        // Thực hiện lưu file PDF vào server
-                        string destinationPath = "server/verified_pdf.pdf";
-                        ifstream srcPdf(pdfPath, ios::binary);
-                        ofstream destPdf(destinationPath, ios::binary);
-                        destPdf << srcPdf.rdbuf();
-                        cout << "PDF is saved to server.\n";
-                    }
-                    else
-                    {
-                        cout << "Fail to verified PDF.\n";
-                    }
+                    cout << "Buyer receiving verified PDF from server.\n";
+                    string pdfPath = "server/verified_pdf.pdf";
+                    string destinationPath = "buyer/received_pdf.pdf";
+                    copyFile(pdfPath, destinationPath);
+                    cout << "PDF received successfully and saved to buyer's directory.\n";
                 }
                 else if (action == 2)
                 {
@@ -298,9 +293,7 @@ int main(int argc, char *argv[])
                         cout << "PDF is verified successfully.\n";
                         // Thực hiện lưu file PDF vào server
                         string destinationPath = "server/verified_pdf.pdf";
-                        ifstream srcPdf(pdfPath, ios::binary);
-                        ofstream destPdf(destinationPath, ios::binary);
-                        destPdf << srcPdf.rdbuf();
+                        copyFile(pdfPath, destinationPath);
                         cout << "PDF is saved to server.\n";
                     }
                     else
@@ -310,11 +303,11 @@ int main(int argc, char *argv[])
                 }
                 else if (action == 2)
                 {
-                    cout << "Server choose send PDF to Buyer.\n";
-                    string pdfPath = "seller/auth.pdf";
-                    string signaturePath = "server/signed_signature.bin";
-                    // Gửi tệp PDF và chữ ký đến Buyer
-                    cout << "Send file to buyer successfully.\n";
+                    cout << "Server sending verified PDF to Buyer.\n";
+                    string pdfPath = "server/verified_pdf.pdf";
+                    string destinationPath = "buyer/received_pdf.pdf";
+                    copyFile(pdfPath, destinationPath);
+                    cout << "PDF sent to buyer successfully.\n";
                 }
                 else if (action == 3)
                 {
