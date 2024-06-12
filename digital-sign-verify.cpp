@@ -9,7 +9,7 @@
 
 using namespace std;
 
-// Function to generate ECC keys
+// Generate ECC keys
 void generateECCKeys(const string &privateKeyFile, const string &publicKeyFile)
 {
     EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, nullptr);
@@ -71,7 +71,7 @@ void generateECCKeys(const string &privateKeyFile, const string &publicKeyFile)
     cout << "ECC keys generated successfully." << endl;
 }
 
-// Function to sign a PDF with ECC private key
+// Sign a PDF with ECC private key
 bool signPdfECC(const string &privateKeyPath, const string &pdfPath, const string &signaturePath)
 {
     OpenSSL_add_all_algorithms();
@@ -133,7 +133,7 @@ bool signPdfECC(const string &privateKeyPath, const string &pdfPath, const strin
     return true;
 }
 
-// Function to verify the signature of a PDF with ECC public key
+// Verify the signature of a PDF with ECC public key
 bool verifySignatureECC(const string &publicKeyPath, const string &pdfPath, const string &signaturePath)
 {
     OpenSSL_add_all_algorithms();
@@ -241,34 +241,6 @@ int main(int argc, char *argv[])
                 }
             } while (action != 3);
             break;
-        case 3:
-            // Code cho (Buyer)
-            cout << "Buyer \n";
-            do
-            {
-                cout << "Choose action :\n";
-                cout << "1: Receive PDF file\n";
-                cout << "2: Exit\n";
-                cin >> action;
-                if (action == 1)
-                {
-                    cout << "Buyer receiving verified PDF from server.\n";
-                    string pdfPath = "server/verified_pdf.pdf";
-                    string destinationPath = "buyer/received_pdf.pdf";
-                    copyFile(pdfPath, destinationPath);
-                    cout << "PDF received successfully and saved to buyer's directory.\n";
-                }
-                else if (action == 2)
-                {
-                    // Exit current role
-                    break;
-                }
-                else
-                {
-                    cout << "Please choose valid action.\n";
-                }
-            } while (action != 2);
-            break;
         case 2:
             // Code cho (Server)
             cout << "Server \n";
@@ -319,6 +291,48 @@ int main(int argc, char *argv[])
                     cout << "Please choose valid action.\n";
                 }
             } while (action != 3);
+            break;
+        case 3:
+            // Code cho (Buyer)
+            cout << "Buyer \n";
+            do
+            {
+                cout << "Choose action :\n";
+                cout << "1: Generate keys\n";
+                cout << "2: Sign file\n";
+                cout << "3: Exit\n";
+                cin >> action;
+                if (action == 1)
+                {
+                    generateECCKeys("buyer/private_key.pem", "server/public_key.pem");
+                }
+                else if (action == 2)
+                {
+                    cout << "Buyer choose sign file PDF.\n";
+                    cout << "Enter pdf file\n";
+                    cin >> pdfFile;
+                    string pdfPath = "buyer/" + pdfFile;
+                    string signaturePath = "server/signed_signature.bin";
+                    if (signPdfECC("buyer/private_key.pem", pdfPath, signaturePath))
+                    {
+                        copyFile("buyer/" + pdfFile, "server/" + pdfFile);
+                        cout << "PDF file is signed successfully.\n";
+                    }
+                    else
+                    {
+                        cout << "Fail.\n";
+                    }
+                }
+                else if (action == 3)
+                {
+                    // Exit current role
+                    break;
+                }
+                else
+                {
+                    cout << "Please choose valid action.\n";
+                }
+            } while (action != 2);
             break;
         case 4:
             // Thoát chương trình
